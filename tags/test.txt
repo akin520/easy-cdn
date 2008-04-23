@@ -1,2 +1,2 @@
 easy_cdn_win_v1.0		win下的bind(view)+squid2.6单服务版 
-
+easy_cdn_linux_1_v1.0		centos5.0 bind(view)+squid2.6单服务器 
