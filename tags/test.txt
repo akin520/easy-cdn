@@ -1,1 +1,2 @@
-test
+easy_cdn_win_v1.0		win下的bind(view)+squid2.6单服务版 
+
