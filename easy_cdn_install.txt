@@ -1,0 +1,84 @@
+Easy-CDN单服务器-----LINUX安装说明
+
+《用bind 和squid打造自己的CDN--linux单服务器版 》发表有好多天了，这几天没事，就做了一个
+Easy-CDN的单服务器的安装包，下载地址如下:
+easy_cdn_linux_squid_v1.0.tgz:
+http://www.namipan.com/d/441ccaaf6e48eec0498ca120146c4086ee2c54d800602c00
+easy_cdn_linux_dns_v1.0.tgz:
+http://www.namipan.com/d/83c3bb4e998a9f4972ee84971abf7ed3e5e9458b0008d900
+
+
+现在就简单说一下其安装说明：
+首先安装智能DNS,下载easy_cdn_linux_dns_v1.0.tgz的包
+tar -zxvf easy_cdn_linux_dns_v1.0.tgz
+cd easy_cdn_linux_dns_v1.0
+./setup.sh
+这样智能DNS就安装完成了，接下来就是设置了，
+cd /edns/sbin
+./rndc-confgen -a
+./rndc-confgen >../etc/rndc.conf
+再将rndc.conf里面的文件，，替换named.conf里面的文件
+将rndc.conf里面的如下代码去掉#号，换到named.conf里面
+------------------------------rndc.conf---------------------
+...............
+
+# Use with the following in named.conf, adjusting the allow list as needed:
+# key "rndc-key" {
+#  algorithm hmac-md5;
+#  secret "e4ByvnC7nWweCsYVMJvrYA==";
+# };
+# 
+# controls {
+#  inet 127.0.0.1 port 953
+#   allow { 127.0.0.1; } keys { "rndc-key"; };
+# };
+# End of named.conf
+
+------------------------------named.conf----------------------
+options {
+    directory "/edns/etc";
+    pid-file "/edns/var/run/named.pid";
+    recursion no;
+    version "0.0.0"; 
+    auth-nxdomain no; 
+
+}; 
+ 
+key "rndc-key" {
+  algorithm hmac-md5;
+  secret "e4ByvnC7nWweCsYVMJvrYA==";
+ };
+ 
+ controls {
+  inet 127.0.0.1 port 953
+   allow { 127.0.0.1; } keys { "rndc-key"; };
+ };
+.............
+----------------------------------------------------------------
+
+cnc.conf是网通的IP段，因为测试，所以没有加入，可以换成自己的，
+master/cnc.def
+master/telecom.def    这两个文件是写的域名，可以根据自己的域名信息填写,如我们写成ecdn.com
+----------cnc.def----------------
+zone "ecdn.com" {
+type master;
+file "master/cnc/ecdn.com";
+};
+--------------------------------
+接下来就到master/cnc/
+mv easy-cdn.cn ecdn.com
+把里面的信息换成自己的就行了，telecom线路也一样，，修改完成后，重启LINUX或者运行/edns/dnsrun.sh,就可以启动智能DNS了.
+
+再安装squid，这个比DNS简单点，
+tar -zxvf easy_cdn_linux_squid_v1.0.tgz
+cd easy_cdn_linux_squid_v1.0
+./setup.sh
+安装完后，配置一下你的域名和域名所对了IP
+文件目录如下
+/cdn/squid/etc/dns.txt      //你的域名信息
+/cdn/squid/etc/host.conf    //域名所对的IP
+修改完之后，重启会自动运行或者运行/cdn/squidrun.sh,就OK了，
+
+还有一些注意的，可以看一下安装包内的readme.txt,此版本在cnetos5.0和RHEL4、5上都没问题，可以正常运行。
+
+
